@@ -122,7 +122,6 @@ def mu_wave(time, shift=0, wave_shift=1, main_freq=10):
     """
     amp_A = 1.0
     amp_B = 0.25
-    shift = 0
     alpha = amp_A * np.sin(main_freq * 2 * np.pi * (time + shift))
     beta = amp_B * np.sin(
         main_freq * 2 * np.pi * 2 * (time + shift) + wave_shift
