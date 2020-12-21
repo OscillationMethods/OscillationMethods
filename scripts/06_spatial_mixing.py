@@ -14,7 +14,7 @@ import matplotlib.image as mpimg
 
 
 def get_dipole_location(channel, electrodes, ch_names, pos, offset=(0, 0, 0)):
-    """ Returns the index of the the mesh node closest to a chosen electrode
+    """Returns the index of the the mesh node closest to a chosen electrode
         position with a potential offset.
     Convenience function for quickly locating dipoles.
 
@@ -39,7 +39,7 @@ def get_dipole_location(channel, electrodes, ch_names, pos, offset=(0, 0, 0)):
 
 
 def plot_mesh(field, plotter, color, opacity=1):
-    """ Visualizes a specific field from NYhead with pyvista and returns
+    """Visualizes a specific field from NYhead with pyvista and returns
         corresponding node positions.
 
     Parameters
@@ -68,7 +68,7 @@ def plot_mesh(field, plotter, color, opacity=1):
 
 
 def plot_electrodes(electrodes, plotter, color="w"):
-    """ Plot electrodes as small cyclinders into a specific pyvista plotter.
+    """Plot electrodes as small cyclinders into a specific pyvista plotter.
 
     Parameters
     ----------
@@ -87,7 +87,7 @@ def plot_electrodes(electrodes, plotter, color="w"):
 
 
 def get_channel_names(h5_file):
-    """ Flatten electrode names into list.
+    """Flatten electrode names into list.
     Parameters
     ----------
     h5_file : H5 file object from which electrode names should be extracted.
@@ -97,6 +97,8 @@ def get_channel_names(h5_file):
     for ch in ch_ref:
         ch_name = "".join([chr(i[0]) for i in h5_file[ch][:]])
         ch_names.append(ch_name)
+
+    ch_names = np.array(ch_names)
 
     return ch_names
 
@@ -122,7 +124,9 @@ def mu_wave(time, shift=0, wave_shift=1, main_freq=10):
     amp_B = 0.25
     shift = 0
     alpha = amp_A * np.sin(main_freq * 2 * np.pi * (time + shift))
-    beta = amp_B * np.sin(main_freq * 2 * np.pi * 2 * (time + shift) + wave_shift)
+    beta = amp_B * np.sin(
+        main_freq * 2 * np.pi * 2 * (time + shift) + wave_shift
+    )
     signal = alpha + beta
 
     return signal
@@ -141,13 +145,19 @@ ch_names = get_channel_names(f)
 # 3d electrode positions
 electrodes = f["sa"]["locs_3D"][:].T
 
+# remove lower electrodes for aesthetical reasons
+idx_select = electrodes[:, 2] > -40
+electrodes = electrodes[idx_select, :]
+
+LF = f["sa"]["cortex75K"]["V_fem_normal"][:]
+LF = LF[:, idx_select]
+ch_names = ch_names[idx_select]
+
 # select an electrode for plotting
 selected_channel = "PO3h"
 idx_chan = np.where(np.array(ch_names) == selected_channel)
 electrodes_selected = electrodes[idx_chan]
 
-# remove lower electrodes for aesthetical reasons
-electrodes1 = electrodes[electrodes[:, 2] > -40, :]
 
 # plot 3d brain
 plotter = pv.Plotter(off_screen=True, window_size=(1200, 1200))
@@ -175,18 +185,21 @@ idx_source2 = get_dipole_location(
 # extract the lead field weights a_i for the two sources for the chosen channel
 # channel activity x_i is a linear mixture of the two sources s_1 and s_2
 # x_i = a_1i * s_1 + a_2i * s_2
-LF = f["sa"]["cortex75K"]["V_fem_normal"][:]
 LF_coef = LF[[idx_source1, idx_source2], idx_chan]
 
 
 # plot 2 dipole locations
 source = pos_brain[[idx_source1], :]
-plotter.add_mesh(source, render_points_as_spheres=True, point_size=40, color="r")
+plotter.add_mesh(
+    source, render_points_as_spheres=True, point_size=40, color="r"
+)
 
 source = pos_brain[[idx_source2], :]
-plotter.add_mesh(source, render_points_as_spheres=True, point_size=40, color="b")
+plotter.add_mesh(
+    source, render_points_as_spheres=True, point_size=40, color="b"
+)
 
-plot_electrodes(electrodes1, plotter, color="w")
+plot_electrodes(electrodes, plotter, color="w")
 plot_electrodes(electrodes_selected, plotter, color="green")
 
 
@@ -227,9 +240,7 @@ nr_signals = 3
 epochs = np.zeros((nr_signals, nr_samples))
 epochs[0] = mu_wave(t, main_freq=main_freq1) + noise1
 epochs[1] = mu_wave(t, main_freq=main_freq2) + noise2
-epochs[2] = (
-    LF_coef[0, 0] * epochs[0] + LF_coef[0, 1] * epochs[1]
-)
+epochs[2] = LF_coef[0, 0] * epochs[0] + LF_coef[0, 1] * epochs[1]
 
 # make MNE object & compute spectra
 ch_signals = ["signal%i" % i for i in range(nr_signals)]
@@ -249,9 +260,7 @@ noise2 = noise_level * sim.sim_powerlaw(nr_seconds, fs, exponent=exponent)
 epochs = np.zeros((nr_signals, nr_samples))
 epochs[0] = mu_wave(t, main_freq=main_freq3, shift=0) + noise1
 epochs[1] = mu_wave(t, main_freq=main_freq3, shift=np.pi) + noise2
-epochs[2] = (
-    LF_coef[0, 0] * epochs[0] + LF_coef[0, 1] * epochs[1]
-)
+epochs[2] = LF_coef[0, 0] * epochs[0] + LF_coef[0, 1] * epochs[1]
 
 # make MNE object & compute spectra
 ch_signals = ["signal%i" % i for i in range(nr_signals)]
@@ -366,8 +375,11 @@ for i in range(nr_signals):
 
 
 # make an MNE datastructure, for plotting the topographies
-info = mne.create_info(ch_names, 1000, "eeg")
-montage = mne.channels.make_standard_montage("standard_1005") # looks strange
+info = mne.create_info(list(ch_names), 1000, "eeg")
+ch_pos = dict(zip(ch_names, electrodes[:, :3]))
+montage = mne.channels.make_dig_montage(ch_pos, coord_frame="head")
+
+# montage = mne.channels.make_standard_montage("standard_1005")  # looks strange
 data = np.zeros((len(ch_names), 10))
 
 # set leadfield as data, such that corresponding channel rows are dropped
@@ -375,10 +387,8 @@ data = np.zeros((len(ch_names), 10))
 data = LF[[idx_source1, idx_source2], :].T
 
 raw2 = mne.io.RawArray(data, info)
-raw2.set_montage(montage,  raise_if_subset=False)  # , on_missing="ignore")
-drop_chan = [ch for ch in raw2.ch_names if "Ex" in ch]
-drop_chan = drop_chan + ["LPA", "Nk1", "Nk2", "Nk3", "Nk4", "Nz", "RPA"]
-raw2.drop_channels(drop_chan)
+raw2.set_montage(montage, raise_if_subset=False)  # , on_missing="ignore")
+
 
 # mark selected channel in the topoplot
 idx_chan = np.where(np.array(raw2.ch_names) == selected_channel)
