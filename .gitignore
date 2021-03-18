@@ -1,2 +1,8 @@
 # Ignore notebook checkpoints
 *.ipynb_checkpoints*
+
+# Ignore cache files
+*/__pycache__/*
+
+# Ignore mac folder files
+.DS_Store
