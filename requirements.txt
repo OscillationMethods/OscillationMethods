@@ -2,7 +2,6 @@ numpy
 scipy
 matplotlib
 seaborn
-pactools
 fooof >= 1.0.0
 neurodsp >= 2.2.0
-bycycle >= 1.0.0
+bycycle == 0.1.3
