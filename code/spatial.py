@@ -226,4 +226,4 @@ def plot_head(h5_file, ch1, ch2, selected_channel, save_out=False):
 
     if save_out:
         plotter.set_background(None)
-        plotter.show(cpos=cpos, interactive_update=False, screenshot='test.png')
+        plotter.show(cpos=cpos, interactive_update=False, screenshot='mesh_nyhead.png')
