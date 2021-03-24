@@ -24,7 +24,9 @@ Each topic is covered by a notebook in this repository.
 This project is described in the following preprint:
 
     Donoghue T, Schaworonkow N, & Voytek B. Methodological considerations for
-    studying neural oscillations. PsyArXiv (LINK FORTHCOMING).
+    studying neural oscillations. PsyArXiv. DOI: 10.31234/osf.io/hvd67
+
+Direct link: https://doi.org/10.31234/osf.io/hvd67
 
 A poster of this project was presented at the
 [LiveMEEG](https://livemeeg2020.org/)
