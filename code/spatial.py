@@ -153,7 +153,7 @@ def plot_topography(raw, ind, selected_channel, colors):
                        markeredgecolor=colors[2],
                        linewidth=0, markersize=5)
 
-    mne.viz.plot_topomap(raw.get_data()[:, 0], raw.info,
+    mne.viz.plot_topomap(raw.get_data()[:, ind], raw.info,
                          mask=mask, mask_params=mask_params);
 
 ###################################################################################################
