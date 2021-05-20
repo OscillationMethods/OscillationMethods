@@ -25,12 +25,13 @@ def plot_bar(d1, d2, label1=None, label2=None, err=None, width=0.65,
     avg_func = AVG_FUNCS_NAN[average]
 
     ax.bar([0.5, 1.5], [avg_func(d1), avg_func(d2)], yerr=err,
-            tick_label=[label1, label2], width=width, **plt_kwargs)
+           tick_label=[label1, label2], width=width, **plt_kwargs)
 
     ax.set_xlim([0, 2])
 
     ax.set_yticks([]);
-    if not label1: ax.set_xticks([]);
+    if not label1:
+        ax.set_xticks([]);
 
     sns.despine(ax=ax, top=True, right=True)
     [ax.spines[side].set_linewidth(lw) for side in ['left', 'bottom']]
@@ -69,7 +70,7 @@ def plot_spectrogram(times, freqs, pxx, flim=None, clear_ticks=False, figsize=No
 
     _, ax = plt.subplots(figsize=figsize)
     plt.imshow(pxx[0:flim, :], extent=[times[0], times[-1], freqs[0], freqs[flim]],
-           aspect='auto', origin='lower', interpolation='hanning')
+               aspect='auto', origin='lower', interpolation='hanning')
 
     if clear_ticks:
         ax.get_xaxis().set_visible(False)
@@ -123,9 +124,10 @@ def plot_harmonic_power(time, signal_mu, signal_mu_filt, signal_beta, colors):
     ax_ts.axhline(0, color="k", alpha=0.2)
     ax_ts.plot(time - offset, signal_mu, color=colors[0])
     ax_ts.plot(time - offset, signal_mu_filt, color=colors[1])
-    ax_ts.plot(time-offset, signal_beta, color=colors[2])
+    ax_ts.plot(time - offset, signal_beta, color=colors[2])
 
-    ax_ts.set(xlim=(0, tmax-offset), ylim=(-1.4, 1), xlabel="time [s]", yticks=[-1, 0, 1]);
+    ax_ts.set(xlim=(0, tmax - offset), ylim=(-1.4, 1),
+              xlabel="time [s]", yticks=[-1, 0, 1]);
 
 
 def plot_pac(bins, pac, colors):
@@ -183,8 +185,8 @@ def plot_data_grid(times, data, freq, psds, colors, freq1=None, freq2=None):
 def plot_legend(labels, colors):
     """Helper function to create a figure legend, by itself."""
 
-    ff = lambda mark, col: plt.plot([], [], marker=mark, color=col, ls="none")[0]
-    handles = [ff("s", colors[ind]) for ind in range(len(labels))]
+    lamb = lambda mark, col: plt.plot([], [], marker=mark, color=col, ls="none")[0]
+    handles = [lamb("s", colors[ind]) for ind in range(len(labels))]
 
     legend = plt.legend(handles, labels, loc=10, framealpha=1, frameon=False)
     plt.axis('off')
@@ -200,7 +202,8 @@ def savefig(save_fig, name, folder='figures/', ext=PLT_EXT, **kwargs):
 def style_psd(ax, clear_x=False, clear_y=True, line_colors=None, line_alpha=1, fontsize=25):
     """Aesthetic styling for a power spectrum plot."""
 
-    ax.set_xlabel(''); ax.set_ylabel('');
+    ax.set_xlabel('');
+    ax.set_ylabel('');
 
     if line_colors:
         for line, color in zip(ax.get_lines(), line_colors):

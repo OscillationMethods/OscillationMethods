@@ -102,7 +102,7 @@ def get_dipole_location(channel, electrodes, ch_names, pos, offset=(0, 0, 0)):
 
     Returns
     -------
-        idx_source : index of node in gray matter mesh
+    idx_source : index of node in gray matter mesh
     """
 
     idx_chan = np.where(np.array(ch_names) == channel)
@@ -188,7 +188,8 @@ def plot_electrodes(electrodes, plotter, color="w"):
     """
 
     for ind in range(len(electrodes)):
-        cylinder = pv.Cylinder(center=electrodes[ind, :3], direction=electrodes[ind, 3:],
+        cylinder = pv.Cylinder(center=electrodes[ind, :3],
+                               direction=electrodes[ind, 3:],
                                radius=3.5, height=2.0)
         plotter.add_mesh(cylinder, color=color)
 
@@ -204,8 +205,7 @@ def plot_head(h5_file, ch1, ch2, selected_channel, save_out=False):
     plot_mesh(pos_brain, tri_brain, plotter=plotter, color="#AAAAAA", opacity=1)
 
     # Get the leadfield coefficients
-    leadfield_coef, idx_source1, idx_source2 = get_leadfield_coefs(\
-        h5_file, ch1, ch2, selected_channel)
+    _, idx_source1, idx_source2 = get_leadfield_coefs(h5_file, ch1, ch2, selected_channel)
 
     # Plot the 2 dipole locations
     plotter.add_mesh(pos_brain[[idx_source1], :],
@@ -214,15 +214,15 @@ def plot_head(h5_file, ch1, ch2, selected_channel, save_out=False):
                      render_points_as_spheres=True, point_size=40, color="b")
 
     # Plot electrodes, highlighting selected electrode in green
-    ch_names, electrodes, leadfield = load_helper(h5_file)
+    ch_names, electrodes, _ = load_helper(h5_file)
     plot_electrodes(electrodes, plotter, color="w")
     plot_electrodes(electrodes[get_channel_index(ch_names, selected_channel)],
                     plotter, color="green")
 
     # Set the camera position for 3d visualization
-    r = 650
+    r_val = 650
     angle = 3.6
-    cpos = [(r * np.sin(angle), r * np.cos(angle), 50), (0, 0, 0), (0, 0, 1)]
+    cpos = [(r_val * np.sin(angle), r_val * np.cos(angle), 50), (0, 0, 0), (0, 0, 1)]
 
     if save_out:
         plotter.set_background(None)

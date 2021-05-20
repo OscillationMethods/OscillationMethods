@@ -74,8 +74,8 @@ def rotate_sig(sig, fs, delta_exp, f_rotation):
     else:
         skipped_zero = False
 
-    f_mask = 10**(np.log10(np.abs(f_axis))*delta_exp)
-    f_mask = f_mask / f_mask[np.where(f_axis==f_rotation)]
+    f_mask = 10**(np.log10(np.abs(f_axis)) * delta_exp)
+    f_mask = f_mask / f_mask[np.where(f_axis == f_rotation)]
 
     fft_rot = fft_vals * f_mask
 
@@ -87,7 +87,7 @@ def rotate_sig(sig, fs, delta_exp, f_rotation):
     return sig_out
 
 
-def make_osc_def(n_seconds, fs, cf, n_off1, n_on, n_off2):
+def make_osc_def(n_off1, n_on, n_off2):
     """Create an oscillation definition of off/on/off."""
 
     return np.array([False] * n_off1 + [True] * n_on + [False] * n_off2)
@@ -118,20 +118,19 @@ def mu_wave(time, shift=0, main_freq=10, wave_shift=0.5*np.pi,
         return alpha + beta
 
 
-def compute_pac(signal_mu_filt, signal_beta_filt, signal_alpha, nbins=21):
+def compute_pac(signal_mu_filt, signal_beta_filt, signal_alpha, n_bins=21):
     """Compute phase-amplitude coupling for a mu signal."""
 
     beta_env = np.abs(scipy.signal.hilbert(signal_beta_filt))
     mu_env = np.abs(scipy.signal.hilbert(signal_mu_filt))
     phase_alpha = np.angle(scipy.signal.hilbert(signal_alpha))
 
-    n_bins = 21
     bins = np.linspace(-np.pi, np.pi, n_bins)
     phase_bins = np.digitize(phase_alpha, bins)
 
     pac = np.zeros((n_bins, 2))
-    for i_bin, bin in enumerate(np.unique(phase_bins)):
-        pac[i_bin, 0] = np.mean(mu_env[(phase_bins == bin)])
-        pac[i_bin, 1] = np.mean(beta_env[(phase_bins == bin)])
+    for i_bin, c_bin in enumerate(np.unique(phase_bins)):
+        pac[i_bin, 0] = np.mean(mu_env[(phase_bins == c_bin)])
+        pac[i_bin, 1] = np.mean(beta_env[(phase_bins == c_bin)])
 
     return bins, pac

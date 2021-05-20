@@ -1,6 +1,5 @@
 """Settings for the oscillation methods project."""
 
-from copy import deepcopy
 from fooof import Bands
 
 ###################################################################################################
