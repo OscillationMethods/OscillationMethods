@@ -1,20 +1,25 @@
 """"Plotting functions for the oscillation methods project."""
 
 import os
+import warnings
 
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+from matplotlib.patches import ConnectionPatch
 import seaborn as sns
-import numpy as np
+
+from neurodsp.filt import filter_signal
+from bycycle.features import compute_features
 
 from utils import AVG_FUNCS_NAN
-from settings import PLT_EXT
+from settings import PLT_EXT, ALPHA_RANGE
 
 ###################################################################################################
 ###################################################################################################
 
 def plot_bar(d1, d2, label1=None, label2=None, err=None, width=0.65,
-             average='mean', lw=4, figsize=None, **plt_kwargs):
+             average='mean', lw=4, ylim=None, figsize=None, **plt_kwargs):
     """Plot a bar graph."""
 
     _, ax = plt.subplots(figsize=figsize)
@@ -28,6 +33,9 @@ def plot_bar(d1, d2, label1=None, label2=None, err=None, width=0.65,
            tick_label=[label1, label2], width=width, **plt_kwargs)
 
     ax.set_xlim([0, 2])
+
+    if ylim:
+        ax.set_ylim(ylim)
 
     ax.set_yticks([]);
     if not label1:
@@ -77,6 +85,47 @@ def plot_spectrogram(times, freqs, pxx, flim=None, clear_ticks=False, figsize=No
         ax.get_yaxis().set_visible(False)
 
 
+def plot_waveforms(times, oscs, fs, cf, burst_detection_kwargs, cmap):
+    """Plot asymmetric oscillations across waveforms, comparing to filtered versions."""
+
+    fig, axes = plt.subplots(4, 1, figsize=(4, 4))
+
+    xlim, ylim = (4.5, 5), (-1.6, 1.6)
+    for osc, color, ax in zip(oscs, cmap, axes):
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=RuntimeWarning)
+            df = compute_features(osc, fs, f_range=(cf - 2, cf + 2),
+                                  burst_detection_kwargs=burst_detection_kwargs)
+
+            sig_filt_al = filter_signal(osc, fs, "bandpass", ALPHA_RANGE)
+            df_filt = compute_features(sig_filt_al, fs, f_range=(cf - 2, cf + 2),
+                                       burst_detection_kwargs=burst_detection_kwargs)
+
+        # Plot an individual waveform
+        plot_waveform(times, osc, sig_filt_al, df, df_filt,
+                      color=color, xlim=xlim, ylim=ylim, ax=ax)
+
+        # Get the locations of the original signal & filtered peaks
+        a1 = np.argmin(np.abs(times - (xlim[0])))
+        a2 = np.argmin(np.abs(times - (xlim[1])))
+        sig_peaks = df.loc[(df['sample_peak'] >= a1) & (df['sample_peak'] <= a2)].sample_peak.values
+        filt_peaks = df_filt.loc[(df_filt['sample_peak'] >= a1) & (df_filt['sample_peak'] <= a2)].sample_peak.values
+
+        # Add shading between the location of the original peak and the filtered peak
+        for peak_sig, peak_filt in zip(sig_peaks, filt_peaks):
+            ax.axvspan(times[peak_sig], times[peak_filt], color=color, alpha=0.25)
+
+    # Add lines across the whole plot indicating the location of the filtered peaks
+    for peak in df_filt.sample_peak:
+        if times[peak] > xlim[0] and times[peak] < xlim[1]:
+            con = ConnectionPatch(xyA=(times[peak], 1.6), xyB=(times[peak], -1.6),
+                                  coordsA="data", coordsB="data",
+                                  axesA=axes[0], axesB=axes[-1],
+                                  color="black", alpha=0.75)
+            axes[0].add_artist(con)
+
+
 def plot_waveform(times, osc, filt, df_raw, df_filt,
                   color=None, xlim=None, ylim=None, ax=None):
     """Plot a time series, with cycle points annotated."""
@@ -84,8 +133,8 @@ def plot_waveform(times, osc, filt, df_raw, df_filt,
     ax.plot(times, filt, color="k", lw=2)
     ax.plot(times, osc, color=color, lw=2)
 
-    ax.plot(times[df_raw.sample_peak], df_raw.volt_peak, ".", color=color, markersize=10)
-    ax.plot(times[df_filt.sample_peak], df_filt.volt_peak, "r.", markersize=10)
+    ax.plot(times[df_raw.sample_peak], df_raw.volt_peak, ".",
+            color=color, markersize=10, markeredgecolor='white')
 
     ax.axis("off")
     ax.set(xlim=xlim, ylim=ylim)
@@ -135,8 +184,8 @@ def plot_pac(bins, pac, colors):
 
     _, ax_pac = plt.subplots(figsize=[4, 4])
 
-    ax_pac.plot(bins, pac[:, 1], color=colors[0])
-    ax_pac.plot(bins, pac[:, 0], color=colors[1])
+    ax_pac.plot(bins, pac[:, 0], color=colors[0])
+    ax_pac.plot(bins, pac[:, 1], color=colors[1])
 
     ax_pac.set_xticks(np.linspace(-np.pi, np.pi, 5))
     ax_pac.set_xticklabels([r"-$\pi$", r"-$0.5\pi$", "0", r"$0.5\pi$", r"$\pi$"])
