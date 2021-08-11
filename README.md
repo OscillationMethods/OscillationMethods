@@ -2,6 +2,8 @@
 
 `Oscillation Methods` project repository: methodological considerations for studying neural oscillations.
 
+[![Paper](https://img.shields.io/badge/DOI-10.1111/ejn.15361-informational.svg)](https://doi.org/10.1111/ejn.15361)
+
 ## Overview
 
 This project is a overview of methodological considerations for analyzing neural oscillations.
@@ -21,17 +23,12 @@ Each topic is covered by a notebook in this repository.
 
 ## Reference
 
-This project is described in the following preprint:
+This project is described in the following paper:
 
     Donoghue T, Schaworonkow N, & Voytek B. Methodological considerations for
-    studying neural oscillations. PsyArXiv. DOI: 10.31234/osf.io/hvd67
+    studying neural oscillations. European Journal of Neuroscience. DOI: 10.1111/ejn.15361
 
-Direct link: https://doi.org/10.31234/osf.io/hvd67
-
-A poster of an earlier version of this project was presented at the
-[LiveMEEG](https://livemeeg2020.org/)
-online conference, and is available
-[here](https://www.dropbox.com/s/jz9fpdk4v8am18h/Donoghue%26Voytek-ConsiderationsMeasuringNeuralOscillations.pdf?dl=0).
+Direct Link: https://onlinelibrary.wiley.com/doi/10.1111/ejn.15361
 
 ## Requirements
 
