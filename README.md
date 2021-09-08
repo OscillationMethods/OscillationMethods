@@ -2,7 +2,8 @@
 
 `Oscillation Methods` project repository: methodological considerations for studying neural oscillations.
 
-[![Paper](https://img.shields.io/badge/DOI-10.1111/ejn.15361-informational.svg)](https://doi.org/10.1111/ejn.15361)
+[![Paper](https://img.shields.io/badge/paper-10.1111/ejn.15361-informational.svg)](https://doi.org/10.1111/ejn.15361)
+[![Website](https://img.shields.io/badge/site-oscillationmethods.github.io-informational.svg)](https://oscillationmethods.github.io)
 
 ## Overview
 
