@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Donoghue"
+    given-names: "Thomas"
+    orcid: "https://orcid.org/0000-0001-5911-0472"
+  - family-names: "Schaworonkow"
+    given-names: "Natalie"
+    orcid: "https://orcid.org/0000-0002-2103-1178"
+  - family-names: "Voytek"
+    given-names: "Bradley"
+    orcid: "https://orcid.org/0000-0003-1640-2525"
+  doi: "10.1111/ejn.15361"
+  journal: "European Journal of Neuroscience"
+  title: "Methodological considerations for studying neural oscillations"
+  year: 2021
+  start: 1
+  end: 26
