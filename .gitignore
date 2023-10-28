@@ -1,3 +1,7 @@
+# Ignore extra folders
+data/*
+figures/*
+
 # Ignore notebook checkpoints
 *.ipynb_checkpoints*
 
